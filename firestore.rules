@@ -1,0 +1,28 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Rules for contracts collection
+    match /contracts/{contractId} {
+      // Allow read for all authenticated users
+      allow read: if request.auth != null;
+      
+      // Allow create/update only if user is the deployer
+      allow create: if request.auth != null 
+        && request.auth.uid != null
+        && resource == null;
+      
+      allow update: if request.auth != null 
+        && request.auth.uid != null
+        && (resource.data.deployer == request.auth.uid 
+            || resource.data.deployer == request.auth.token.firebase.identities['ethereum'][0]);
+      
+      // Prevent deletion for data integrity
+      allow delete: if false;
+    }
+    
+    // Deny all other reads/writes
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
