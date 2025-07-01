@@ -2,6 +2,8 @@
 
 A minimalist React web application for uploading, storing, and deploying Solidity smart contracts to Ethereum-compatible testnets with IPFS integration.
 
+![App Overview](./screenshots/app-overview.png)
+
 ## Features
 
 - **File Upload**: Upload Solidity (.sol) smart contract files via drag-and-drop interface
@@ -61,10 +63,25 @@ A minimalist React web application for uploading, storing, and deploying Solidit
 
 ## Usage
 
-1. **Connect Wallet**: Click "Connect Wallet" and connect your MetaMask
-2. **Upload Contract**: Drag and drop your .sol file or click to browse
-3. **Deploy**: Select target network and provide constructor arguments if needed
-4. **Track**: View deployment history in the "History" tab
+### 1. Connect Wallet
+![Wallet Connection](./screenshots/wallet-connection.png)
+Click "Connect Wallet" and connect your MetaMask to get started.
+
+### 2. Upload Contract
+![File Upload](./screenshots/file-upload.png)
+Drag and drop your .sol file or click to browse. The app will automatically compile it and detect constructor requirements.
+
+### 3. Deploy Contract
+![Deployment Form](./screenshots/deployment-form.png)
+Select target network, provide constructor arguments if needed, and deploy your contract.
+
+### 4. Deployment Success
+![Deployment Success](./screenshots/deployment-success.png)
+View your successfully deployed contract with links to blockchain explorers.
+
+### 5. Track Deployments
+![Deployment History](./screenshots/deployment-history.png)
+Monitor all your contract deployments in the history dashboard with filtering options.
 
 ## Smart Contract Compilation
 
