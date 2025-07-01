@@ -72,15 +72,9 @@ This application now features **real-time Solidity compilation** using a Node.js
 
 - **Primary**: Real Solidity compilation via Node.js backend using `solc-js` library
 - **Fallback 1**: Pre-compiled contract templates for common patterns
-- **Fallback 2**: Mock compilation for demonstration when backend is unavailable
 
 **Backend Integration:**
 The Express.js backend provides a `/compile` endpoint that accepts Solidity source code and returns compiled bytecode and ABI using the official Solidity compiler. This enables deployment of any valid Solidity contract, not just pre-compiled templates.
-
-**Why the hybrid approach?**
-- **Browser Limitations**: `solc-js` requires a Node.js environment and cannot run directly in browsers
-- **Reliability**: Multiple fallback layers ensure the app works even if the backend is temporarily unavailable
-- **Performance**: Pre-compiled templates provide instant deployment for common use cases
 
 ## Supported Networks
 
