@@ -257,17 +257,17 @@ class BlockchainService {
       
       if (currentChainId === '0xa869') {
         deployOptions = {
-          gasLimit: Math.floor(Math.min(Number(estimatedGas) * 120 / 100, 1000000)),
+          gasLimit: Math.floor(Math.min(Number(estimatedGas) * 130 / 100, 2500000)), // Increased for complex contracts
           gasPrice: ethers.parseUnits('25', 'gwei')
         };
       } else if (currentChainId === '0xaa36a7') {
         deployOptions = {
-          gasLimit: Math.floor(Math.min(Number(estimatedGas) * 120 / 100, 800000)),
+          gasLimit: Math.floor(Math.min(Number(estimatedGas) * 130 / 100, 2000000)), // Increased for complex contracts
           gasPrice: ethers.parseUnits('20', 'gwei')
         };
       } else {
         deployOptions = {
-          gasLimit: Math.floor(Math.min(Number(estimatedGas) * 120 / 100, 900000))
+          gasLimit: Math.floor(Math.min(Number(estimatedGas) * 130 / 100, 2200000)) // Increased for complex contracts
         };
       }
 
