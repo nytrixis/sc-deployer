@@ -3,8 +3,30 @@ import cors from 'cors';
 import multer from 'multer';
 import solc from 'solc';
 import dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
+
+// Function to resolve imports from node_modules
+function findImports(importPath) {
+  try {
+    if (importPath.startsWith('@openzeppelin/')) {
+      const contractPath = path.join(__dirname, 'node_modules', importPath);
+      if (fs.existsSync(contractPath)) {
+        const content = fs.readFileSync(contractPath, 'utf8');
+        return { contents: content };
+      }
+    }
+    return { error: `File not found: ${importPath}` };
+  } catch (error) {
+    return { error: `Error reading ${importPath}: ${error.message}` };
+  }
+}
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -86,7 +108,7 @@ app.post('/compile', upload.single('contract'), async (req, res) => {
     };
 
     // Compile the contract
-    const output = JSON.parse(solc.compile(JSON.stringify(input)));
+    const output = JSON.parse(solc.compile(JSON.stringify(input), { import: findImports }));
 
     // Check for compilation errors
     if (output.errors) {

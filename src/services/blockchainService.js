@@ -244,7 +244,8 @@ class BlockchainService {
         
         const deploymentData = contractFactory.interface.encodeDeploy(constructorArgs);
         estimatedGas = await this.provider.estimateGas({
-          data: cleanBytecode + deploymentData.slice(2)
+          data: cleanBytecode + deploymentData.slice(2),
+          from: this.account // Use the connected wallet address for gas estimation
         });
         console.log('Estimated gas:', estimatedGas.toString());
       } catch (error) {
