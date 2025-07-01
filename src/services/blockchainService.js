@@ -258,16 +258,17 @@ class BlockchainService {
       if (currentChainId === '0xa869') {
         deployOptions = {
           gasLimit: Math.floor(Math.min(Number(estimatedGas) * 130 / 100, 2500000)), // Increased for complex contracts
-          gasPrice: ethers.parseUnits('25', 'gwei')
+          gasPrice: ethers.parseUnits('1', 'gwei') // Minimal gas price for testnet
         };
       } else if (currentChainId === '0xaa36a7') {
         deployOptions = {
           gasLimit: Math.floor(Math.min(Number(estimatedGas) * 130 / 100, 2000000)), // Increased for complex contracts
-          gasPrice: ethers.parseUnits('20', 'gwei')
+          gasPrice: ethers.parseUnits('1', 'gwei') // Minimal gas price for testnet
         };
       } else {
         deployOptions = {
           gasLimit: Math.floor(Math.min(Number(estimatedGas) * 130 / 100, 2200000)) // Increased for complex contracts
+          // Polygon uses network default gas price (usually very low)
         };
       }
 
