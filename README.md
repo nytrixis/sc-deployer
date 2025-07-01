@@ -65,7 +65,7 @@ This application uses a **hybrid compilation approach** due to browser limitatio
 - **Real Deployment**: All contracts (pre-compiled and custom) deploy successfully to testnets
 
 **Why not dynamic compilation?**
-The `solc-js` library is designed for Node.js environments and has compatibility issues in browser contexts. While `solc-js-browser` exists, it's not actively maintained and caused build failures in our React/Vite setup. Our hybrid approach ensures reliable deployment while maintaining the user experience.
+The `solc-js` library is designed for Node.js environments and has compatibility issues in browser contexts. While `solc-js-browser` exists, it's not actively maintained and caused build failures in my React/Vite setup. My hybrid approach ensures reliable deployment while maintaining the user experience.
 
 ## Supported Networks
 
