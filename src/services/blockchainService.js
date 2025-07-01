@@ -236,7 +236,9 @@ class BlockchainService {
           if (expectedArgCount === 0) {
             constructorArgs = [];
           } else {
-            throw new Error(`Constructor expects ${expectedArgCount} arguments but ${constructorArgs.length} provided`);
+            const constructor = abi.find(item => item.type === 'constructor');
+            const paramNames = constructor.inputs.map(input => `${input.name} (${input.type})`).join(', ');
+            throw new Error(`Constructor requires ${expectedArgCount} argument(s): ${paramNames}. You provided ${constructorArgs.length} argument(s).`);
           }
         }
         
@@ -254,17 +256,17 @@ class BlockchainService {
       
       if (currentChainId === '0xa869') {
         deployOptions = {
-          gasLimit: Math.min(Number(estimatedGas) * 120 / 100, 1000000),
+          gasLimit: Math.floor(Math.min(Number(estimatedGas) * 120 / 100, 1000000)),
           gasPrice: ethers.parseUnits('25', 'gwei')
         };
       } else if (currentChainId === '0xaa36a7') {
         deployOptions = {
-          gasLimit: Math.min(Number(estimatedGas) * 120 / 100, 800000),
+          gasLimit: Math.floor(Math.min(Number(estimatedGas) * 120 / 100, 800000)),
           gasPrice: ethers.parseUnits('20', 'gwei')
         };
       } else {
         deployOptions = {
-          gasLimit: Math.min(Number(estimatedGas) * 120 / 100, 900000)
+          gasLimit: Math.floor(Math.min(Number(estimatedGas) * 120 / 100, 900000))
         };
       }
 

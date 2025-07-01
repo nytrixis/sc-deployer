@@ -14,6 +14,7 @@ A minimalist React web application for uploading, storing, and deploying Solidit
 ## Tech Stack
 
 - **Frontend**: React 18, Vite, Tailwind CSS
+- **Backend**: Node.js, Express, solc-js (Solidity compiler)
 - **Blockchain**: ethers.js, MetaMask integration
 - **Storage**: IPFS (Pinata), Firebase Firestore
 - **Deployment**: Supports Avalanche Fuji, Sepolia, Polygon testnets
@@ -23,8 +24,9 @@ A minimalist React web application for uploading, storing, and deploying Solidit
 1. **Clone and Install**
    ```bash
    git clone <repository-url>
-   cd task2
+   cd smart-contract-uploader
    npm install
+   cd backend && npm install && cd ..
    ```
 
 2. **Environment Setup**
@@ -37,11 +39,19 @@ A minimalist React web application for uploading, storing, and deploying Solidit
    # IPFS Pinata (required for real uploads)
    VITE_PINATA_API_KEY=your_pinata_api_key
    VITE_PINATA_SECRET_KEY=your_pinata_secret_key
+   
+   # Backend URL (default: http://localhost:3001)
+   VITE_BACKEND_URL=http://localhost:3001
    ```
 
 3. **Run Application**
    ```bash
-   npm run dev
+   # Option 1: Run both frontend and backend together
+   npm run dev:full
+   
+   # Option 2: Run separately
+   npm run backend    # Terminal 1 - Backend server
+   npm run dev        # Terminal 2 - Frontend server
    ```
 
 4. **Setup MetaMask**
@@ -58,14 +68,19 @@ A minimalist React web application for uploading, storing, and deploying Solidit
 
 ## Smart Contract Compilation
 
-This application uses a **hybrid compilation approach** due to browser limitations:
+This application now features **real-time Solidity compilation** using a Node.js backend with `solc-js`:
 
-- **Pre-compiled Contracts**: For optimal performance, popular contract templates are pre-compiled
-- **Mock Compilation**: Custom contracts receive mock compilation responses for demonstration
-- **Real Deployment**: All contracts (pre-compiled and custom) deploy successfully to testnets
+- **Primary**: Real Solidity compilation via Node.js backend using `solc-js` library
+- **Fallback 1**: Pre-compiled contract templates for common patterns
+- **Fallback 2**: Mock compilation for demonstration when backend is unavailable
 
-**Why not dynamic compilation?**
-The `solc-js` library is designed for Node.js environments and has compatibility issues in browser contexts. While `solc-js-browser` exists, it's not actively maintained and caused build failures in my React/Vite setup. My hybrid approach ensures reliable deployment while maintaining the user experience.
+**Backend Integration:**
+The Express.js backend provides a `/compile` endpoint that accepts Solidity source code and returns compiled bytecode and ABI using the official Solidity compiler. This enables deployment of any valid Solidity contract, not just pre-compiled templates.
+
+**Why the hybrid approach?**
+- **Browser Limitations**: `solc-js` requires a Node.js environment and cannot run directly in browsers
+- **Reliability**: Multiple fallback layers ensure the app works even if the backend is temporarily unavailable
+- **Performance**: Pre-compiled templates provide instant deployment for common use cases
 
 ## Supported Networks
 

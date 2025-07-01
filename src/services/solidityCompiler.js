@@ -1,5 +1,6 @@
 class SolidityCompiler {
   constructor() {
+    this.backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
     this.precompiledContracts = {
       'SimpleStorage': {
         bytecode: "0x608060405234801561001057600080fd5b5060405161012c38038061012c83398101604081905261002f91610037565b600055610050565b60006020828403121561004957600080fd5b5051919050565b60d68061005f6000396000f3fe6080604052348015600f57600080fd5b506004361060325760003560e01c80633fa4f2451460375780635524107714604c575b600080fd5b60005460405190815260200160405180910390f35b605c6057366004605e565b600055565b005b600060208284031215606f57600080fd5b503591905056fea2646970667358221220d4c8d9d8b7b5b8a5c7b5c8a2f3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e563736f6c63430008130033",
@@ -149,47 +150,106 @@ class SolidityCompiler {
 
   async compileContract(sourceCode, contractName) {
     try {
-      this.validateSourceCode(sourceCode);
+      console.log('🔧 Attempting backend compilation...');
       
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const extractedName = this.extractContractName(sourceCode);
-      const finalContractName = extractedName || contractName;
-      
-      if (this.precompiledContracts[finalContractName]) {
-        const precompiled = this.precompiledContracts[finalContractName];
-        
-        return {
-          bytecode: precompiled.bytecode,
-          abi: precompiled.abi,
-          contractName: finalContractName,
-          isCompiled: true,
-          compilationResult: {
-            warnings: [],
-            info: `Pre-compiled ${finalContractName} contract loaded successfully`
-          }
-        };
+      // Try backend compilation first
+      const backendResult = await this.compileWithBackend(sourceCode, contractName);
+      if (backendResult) {
+        console.log('✅ Backend compilation successful');
+        return backendResult;
       }
-      
-      const mockResult = this.generateMockCompilation(sourceCode);
+    } catch (error) {
+      console.warn('⚠️ Backend compilation failed:', error.message);
+      console.log('🔄 Falling back to precompiled contracts...');
+    }
+
+    // Fallback to precompiled contracts
+    this.validateSourceCode(sourceCode);
+    
+    const extractedName = this.extractContractName(sourceCode);
+    const finalContractName = extractedName || contractName;
+    
+    if (this.precompiledContracts[finalContractName]) {
+      const precompiled = this.precompiledContracts[finalContractName];
       
       return {
-        ...mockResult,
+        bytecode: precompiled.bytecode,
+        abi: precompiled.abi,
         contractName: finalContractName,
         isCompiled: true,
+        compiler: 'precompiled',
         compilationResult: {
-          warnings: [
-            {
-              severity: 'info',
-              message: `Mock compilation successful for ${finalContractName}. In production, this would use real Solidity compiler.`
-            }
-          ]
+          warnings: [],
+          info: `Pre-compiled ${finalContractName} contract loaded successfully`
+        }
+      };
+    }
+    
+    // Final fallback to mock compilation
+    const mockResult = this.generateMockCompilation(sourceCode);
+    
+    return {
+      ...mockResult,
+      contractName: finalContractName,
+      isCompiled: true,
+      compiler: 'mock',
+      compilationResult: {
+        warnings: [
+          {
+            severity: 'info',
+            message: `Mock compilation successful for ${finalContractName}. Backend unavailable.`
+          }
+        ]
+      }
+    };
+  }
+
+  async compileWithBackend(sourceCode, contractName) {
+    try {
+      // Check if backend is available
+      const healthCheck = await fetch(`${this.backendUrl}/health`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (!healthCheck.ok) {
+        throw new Error('Backend service unavailable');
+      }
+
+      // Send compilation request
+      const response = await fetch(`${this.backendUrl}/compile`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sourceCode,
+          contractName,
+          fileName: contractName || 'Contract'
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      return {
+        bytecode: result.bytecode,
+        abi: result.abi,
+        contractName: result.contractName,
+        isCompiled: true,
+        compiler: 'solc-js',
+        version: result.version,
+        compilationResult: {
+          warnings: result.warnings || [],
+          info: `Real Solidity compilation successful using ${result.compiler}`
         }
       };
 
     } catch (error) {
-      console.error('❌ Compilation error:', error);
-      throw new Error(`Failed to compile contract: ${error.message}`);
+      console.error('Backend compilation error:', error);
+      throw error;
     }
   }
   

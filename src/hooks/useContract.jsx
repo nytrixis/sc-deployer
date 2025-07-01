@@ -32,7 +32,19 @@ export const useContract = () => {
       setUploadProgress(25);
       
       const ipfsResult = await ipfsService.uploadFile(file);
-      setUploadProgress(75);
+      setUploadProgress(50);
+      
+      // Compile contract immediately to get ABI and show constructor requirements
+      let compiledContract = null;
+      try {
+        const contractName = file.name.replace(/\.[^/.]+$/, "");
+        compiledContract = await blockchainService.compileContract(sourceCode, contractName);
+        setUploadProgress(75);
+      } catch (compileError) {
+        console.warn('Compilation failed during upload:', compileError);
+        // Continue with upload even if compilation fails
+        setUploadProgress(75);
+      }
       
       const contractData = {
         fileName: file.name,
@@ -46,7 +58,12 @@ export const useContract = () => {
         contractAddress: null,
         transactionHash: null,
         deployer: null,
-        sourceCode: sourceCode
+        sourceCode: sourceCode,
+        // Store compilation results if available
+        abi: compiledContract?.abi || null,
+        bytecode: compiledContract?.bytecode || null,
+        isCompiled: !!compiledContract,
+        compilationInfo: compiledContract?.compilationResult || null
       };
       
       const docId = await firebaseService.saveContract(contractData);
@@ -76,10 +93,23 @@ export const useContract = () => {
     try {
       const contractName = contract.fileName.replace(/\.[^/.]+$/, "");
       
-      const compiledContract = await blockchainService.compileContract(
-        contract.sourceCode,
-        contractName
-      );
+      // Use pre-compiled contract data if available, otherwise compile now
+      let compiledContract;
+      if (contract.abi && contract.bytecode && contract.isCompiled) {
+        console.log('Using pre-compiled contract data from upload...');
+        compiledContract = {
+          abi: contract.abi,
+          bytecode: contract.bytecode,
+          contractName: contractName,
+          isCompiled: true
+        };
+      } else {
+        console.log('Compiling contract during deployment...');
+        compiledContract = await blockchainService.compileContract(
+          contract.sourceCode,
+          contractName
+        );
+      }
 
       const deploymentResult = await blockchainService.deployContract(
         compiledContract,
